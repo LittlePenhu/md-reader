@@ -1,7 +1,11 @@
 # MD 阅读器
 
+![GitHub Release](https://img.shields.io/github/v/release/LittlePenhu/md-reader)
+![Downloads](https://img.shields.io/github/downloads/LittlePenhu/md-reader/total)
+![Language](https://img.shields.io/github/languages/top/LittlePenhu/md-reader)
+
 本地 Markdown 阅读器：美观、双击即用、纯本地运行（不上传任何数据）。
-默认界面风格：黛绿 · 新中式（可在应用内随时切换 4 种风格 × 深浅色）。
+默认界面风格：黛绿 · 新中式（可在应用内随时切换 5 种风格 × 深浅色）。
 
 ## 功能
 
@@ -24,8 +28,8 @@
 
 ## 使用
 
-**已打包好的成品**：`MD阅读器.exe`（双击即用，无终端窗口）。
-命令行方式：`MD阅读器.exe 文件.md` 可直接打开指定文件。
+**下载最新版**：[GitHub Releases](https://github.com/LittlePenhu/md-reader/releases) 下载 `MDReader-vX.X.X.exe`（双击即用，无终端窗口）。
+命令行方式：`MDReader-vX.X.X.exe 文件.md` 可直接打开指定文件。
 
 ## 从源码运行
 
