@@ -1,0 +1,14 @@
+# PyInstaller 构建产物
+build/
+dist/
+*.spec.bak
+
+# 打包好的 exe（体积大且可从源码构建）
+MD阅读器.exe
+
+# Python
+__pycache__/
+*.pyc
+
+# 本地状态与临时文件
+*.log
