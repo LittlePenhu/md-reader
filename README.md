@@ -1,7 +1,7 @@
 # MD 阅读器
 
-![GitHub Release](https://img.shields.io/github/v/release/LittlePenhu/md-reader)
-![Downloads](https://img.shields.io/github/downloads/LittlePenhu/md-reader/total)
+[![GitHub Release](https://img.shields.io/github/v/release/LittlePenhu/md-reader?v=1.2.0)](https://github.com/LittlePenhu/md-reader/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/LittlePenhu/md-reader/total)](https://github.com/LittlePenhu/md-reader/releases)
 ![Language](https://img.shields.io/github/languages/top/LittlePenhu/md-reader)
 
 本地 Markdown 阅读器：美观、双击即用、纯本地离线运行（集成 KaTeX 公式渲染与代码语法高亮，不上传任何数据）。
