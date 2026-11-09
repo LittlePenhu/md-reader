@@ -4,7 +4,7 @@
 ![Downloads](https://img.shields.io/github/downloads/LittlePenhu/md-reader/total)
 ![Language](https://img.shields.io/github/languages/top/LittlePenhu/md-reader)
 
-本地 Markdown 阅读器：美观、双击即用、纯本地运行（不上传任何数据）。
+本地 Markdown 阅读器：美观、双击即用、纯本地离线运行（集成 KaTeX 公式渲染与代码语法高亮，不上传任何数据）。
 默认界面风格：黛绿 · 新中式（可在应用内随时切换 5 种风格 × 深浅色）。
 
 ## 功能
@@ -29,8 +29,8 @@
 
 ## 使用
 
-**下载最新版**：[GitHub Releases](https://github.com/LittlePenhu/md-reader/releases) 下载 `MDReader-vX.X.X.exe`（双击即用，无终端窗口）。
-命令行方式：`MDReader-vX.X.X.exe 文件.md` 可直接打开指定文件。
+**下载最新版**：前往 [GitHub Releases](https://github.com/LittlePenhu/md-reader/releases) 下载最新发布的 `MDReader-v1.2.0.exe`（双击即用，无终端窗口，无需安装 Python 环境）。
+命令行方式：`MDReader-v1.2.0.exe 文件.md` 可直接打开指定文件。
 
 ## 从源码运行
 
@@ -48,7 +48,11 @@ python app.py 文件.md         # 直接打开指定文件
 
 ```powershell
 pip install pyinstaller
-pyinstaller --onefile --noconsole --name "MD阅读器" --add-data "web;web" app.py
+# 使用项目自带的优化 spec 文件一键打包（已配置体积瘦身与离线资源打入）：
+pyinstaller "MD阅读器.spec" --clean -y
+
+# 或使用标准命令行打包：
+# pyinstaller --onefile --noconsole --name "MD阅读器" --add-data "web;web" app.py
 # 产物：dist\MD阅读器.exe（--noconsole = 启动时不弹终端；web\libs\ 一并打入，离线可用）
 ```
 
@@ -84,6 +88,6 @@ MD阅读器/
 ├── app.py          # 主程序（窗口 + 文件读写 + 图片/进度/状态）
 ├── web/
 │   ├── index.html  # 界面（主页 + 设置页 + 阅读视图 + 目录 + 搜索，单文件）
-│   └── libs/       # marked / highlight.js / DOMPurify 本地副本（离线渲染用）
+│   └── libs/       # marked / KaTeX / highlight.js / DOMPurify 本地副本（离线渲染用）
 └── README.md
 ```
