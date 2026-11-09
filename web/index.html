@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MD 阅读器</title>
+<link rel="stylesheet" href="libs/katex/katex.min.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';">
 <style>
 /* ================= 主题变量：4 风格 × 2 模式 ================= */
 :root {
@@ -263,6 +264,19 @@ article { flex: 1; overflow-y: auto; }
 .hljs-meta, .hljs-keyword.operator { color: var(--tok-meta); }
 .hljs-emphasis { font-style: italic; }
 .hljs-strong { font-weight: 700; }
+
+/* ================= 数学公式 (KaTeX) ================= */
+.katex { font-size: 1.05em; color: var(--ink); }
+.katex-display { margin: 0 !important; }
+.katex-block {
+  margin: 1.2em 0; padding: 8px 0;
+  overflow-x: auto; overflow-y: hidden;
+  text-align: center;
+}
+.katex-error {
+  color: #d25445; font-family: var(--font-code); font-size: .9em;
+  background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+}
 
 /* 搜索高亮 */
 mark.hl { background: var(--mark-bg); color: inherit; border-radius: 2px; padding: 0 1px; }
@@ -602,7 +616,7 @@ kbd {
           <div><span>刷新当前文件</span><kbd>F5 / Ctrl+R</kbd></div>
           <div><span>关闭搜索</span><kbd>Esc</kbd></div>
         </div>
-        <p class="about-line">MD 阅读器 v1.1 · marked + highlight.js + DOMPurify · 界面与渲染完全本地化</p>
+        <p class="about-line">MD 阅读器 v1.2.0 · marked + KaTeX + highlight.js + DOMPurify · 界面与渲染完全本地化</p>
       </div>
     </div>
   </div>
@@ -679,6 +693,13 @@ var CDNS = {
     "https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js",
     "https://cdn.bootcdn.net/ajax/libs/dompurify/3.1.6/purify.min.js"
+  ],
+  katex: [
+    "libs/katex/katex.min.js",
+    "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js",
+    "https://unpkg.com/katex@0.16.9/dist/katex.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js",
+    "https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.js"
   ]
 };
 function loadScript(url, timeoutMs) {
@@ -738,12 +759,105 @@ function stripFrontMatter(s) {
   return s.replace(/^\uFEFF?---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/, "");
 }
 
+/* ================= 数学公式 (KaTeX) 扩展 ================= */
+function initMarkedMath() {
+  if (window.__mathExtensionRegistered || !window.marked || !window.katex) return;
+  window.__mathExtensionRegistered = true;
+
+  var blockMathRule = /^[ \t]*\$\$((?:\n[\s\S]*?\n|[^\$\n]+?))\$\$[ \t]*(?:\n|$)/;
+  var inlineMathRule = /^\$(?!\$)(?!\s)((?:\\\$|\\\\|[^\$\n])*?[^\s\$\\])\$(?!\d)/;
+
+  window.marked.use({
+    extensions: [
+      {
+        name: "blockMath",
+        level: "block",
+        start: function (src) {
+          var idx = src.indexOf("$$");
+          return idx === -1 ? undefined : idx;
+        },
+        tokenizer: function (src) {
+          var match = src.match(blockMathRule);
+          if (match) {
+            return {
+              type: "blockMath",
+              raw: match[0],
+              text: match[1].trim()
+            };
+          }
+        },
+        renderer: function (token) {
+          try {
+            return '<div class="katex-block">' + window.katex.renderToString(token.text, {
+              displayMode: true,
+              throwOnError: false
+            }) + "</div>\n";
+          } catch (e) {
+            return '<div class="katex-block katex-error">' + escapeHtml(token.raw) + "</div>\n";
+          }
+        }
+      },
+      {
+        name: "inlineMath",
+        level: "inline",
+        start: function (src) {
+          var index = src.indexOf("$");
+          while (index !== -1) {
+            if (index === 0 || src.charAt(index - 1) !== "\\") {
+              return index;
+            }
+            index = src.indexOf("$", index + 1);
+          }
+          return undefined;
+        },
+        tokenizer: function (src) {
+          var match = src.match(inlineMathRule);
+          if (match) {
+            return {
+              type: "inlineMath",
+              raw: match[0],
+              text: match[1]
+            };
+          }
+        },
+        renderer: function (token) {
+          try {
+            return window.katex.renderToString(token.text, {
+              displayMode: false,
+              throwOnError: false
+            });
+          } catch (e) {
+            return token.raw;
+          }
+        }
+      }
+    ],
+    renderer: {
+      code: function (code, infostring) {
+        var lang = (infostring || "").trim().toLowerCase();
+        if (lang === "math" || lang === "latex" || lang === "katex") {
+          try {
+            return '<div class="katex-block">' + window.katex.renderToString(code, {
+              displayMode: true,
+              throwOnError: false
+            }) + "</div>\n";
+          } catch (e) {
+            return '<div class="katex-block katex-error">' + escapeHtml(code) + "</div>\n";
+          }
+        }
+        return false;
+      }
+    }
+  });
+}
+
 function renderFile(data, opts) {
   opts = opts || {};
   currentPath = data.path || null;
   currentMtime = data.mtime || null;
   $("filename").textContent = data.name || "";
   document.title = (data.name ? data.name + " · " : "") + "MD 阅读器";
+  if (window.marked && window.katex) initMarkedMath();
   var md = stripFrontMatter(data.content);
   var html = window.marked ? window.marked.parse(md) : escapeHtml(md);
   if (window.DOMPurify) html = window.DOMPurify.sanitize(html);
@@ -1445,9 +1559,16 @@ async function bootstrap() {
     showHome();
   }
   /* 加载本地/CDN 渲染库（不阻塞首次渲染） */
-  var libs = await Promise.all([loadLib("marked"), loadLib("hljs"), loadLib("dompurify")]);
+  var libs = await Promise.all([loadLib("marked"), loadLib("hljs"), loadLib("dompurify"), loadLib("katex")]);
   if (window.marked) {
     window.marked.setOptions({ gfm: true, breaks: false });
+    initMarkedMath();
+  }
+  if (window.DOMPurify) {
+    window.DOMPurify.setConfig({
+      ADD_TAGS: ["semantics", "annotation"],
+      ADD_ATTR: ["aria-hidden", "encoding"]
+    });
   }
   if (!libs[0] && !CDN_BANNER_SHOWN) {
     CDN_BANNER_SHOWN = true;

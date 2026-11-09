@@ -10,7 +10,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['cryptography', 'bcrypt', 'jinja2', 'setuptools', 'pip', 'wheel', 'unittest', 'pydoc'],
     noarchive=False,
     optimize=0,
 )
